@@ -151,9 +151,11 @@ export default class VastAds extends UICorePlugin {
                         $('[data-player]').prepend($('<button/>', {
                           id: 'ad-skip',
                           class: 'plugin-ads linear-skip',
-                          text: (this._options.VastAdsConfig.skipMessage || this.i18n[this._options.language || 'en']['vast_ads_skip']) +  ' ➜'
+                          html: (this._options.VastAdsConfig.skipMessage || this.i18n[this._options.language || 'en']['vast_ads_skip']) +  '<i class="plugin-ads icon">'
                         }).click(() => {
                           this.vastTracker.skip()
+                          $('[data-player] > .container > div').show()
+                          window.player.core.enableMediaControl()
                           this.core.getCurrentPlayback().seekPercentage(100)
                         }))
                       }
@@ -161,8 +163,8 @@ export default class VastAds extends UICorePlugin {
                   })
 
                   this.listenToOnce(this.core.getCurrentPlayback(), Events.PLAYBACK_PLAY, () => {
-                    // this.core.mediaControl.container.disableMediaControl()
-                    this.core.mediaControl.container.settings.seekEnabled = false
+                    window.player.core.disableMediaControl()
+                    $('[data-player] > .container > div').hide()
                     this.core.mediaControl.container.getPlugin('click_to_pause').disable()
                     $('[data-player]').prepend($('<h1/>', {
                       id: 'ad-text',
@@ -172,6 +174,8 @@ export default class VastAds extends UICorePlugin {
                   })
 
                   this.listenToOnce(this.core.getCurrentPlayback(), Events.PLAYBACK_ENDED, () => {
+                    window.player.core.enableMediaControl()
+                    $('[data-player] > .container > div').show()
                     $('.plugin-ads').remove();
                     this.core.configure({ autoPlay: true })
                     this.core.load(originalSource)
